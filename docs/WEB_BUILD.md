@@ -50,5 +50,5 @@ docker run --rm -v "$PWD/out:/output" tvarovna-builder package.web.static
 
 ## Známá omezení
 
--   Puzzle DLC volá online API puzzle serveru tobspr. Pro co-op ho ve fázi 4 skryjeme.
--   Odkaz na Steam a sociální sítě v menu zatím zůstává (řeší se ve fázi 4 s vlastní úvodní stránkou).
+-   Puzzle DLC volá online API puzzle serveru tobspr a v menu pro hru „sám“ záměrně zůstává,
+    stejně jako odkazy na Steam a sociální sítě. Co-op má vlastní úvodní stránku.

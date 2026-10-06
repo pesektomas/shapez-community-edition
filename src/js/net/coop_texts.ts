@@ -29,7 +29,7 @@ const cs = {
         ],
         quick: [
             "Rychlý start (level 7)",
-            "Pro ty, kdo shapez znají. Odemčené balancery, rotátory, tunely a lakovna.",
+            "Pro ty, kdo shapez znají. Odemčené řezačky, balancery, rotátory, tunely a lakovna.",
         ],
         freeplay: ["Freeplay (level 27+)", "Všechno odemčené, náhodné cíle. Na dlouhé hraní."],
     },
@@ -96,7 +96,7 @@ const en: Texts = {
         fresh: ["From scratch (level 1)", "Recommended for the first game. The first levels are a tutorial."],
         quick: [
             "Quick start (level 7)",
-            "For shapez veterans. Balancers, rotators, tunnels and painters unlocked.",
+            "For shapez veterans. Cutters, balancers, rotators, tunnels and painters unlocked.",
         ],
         freeplay: ["Freeplay (level 27+)", "Everything unlocked, random goals. For long sessions."],
     },

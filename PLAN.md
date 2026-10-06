@@ -61,11 +61,11 @@ Repo: https://github.com/tobspr-games/shapez-community-edition, aktivní, posled
 
 ### Volba startu při zakládání světa
 
-| Režim                                               | Pro koho                 | Co se stane                                                                                                 |
-| --------------------------------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------- |
-| Od začátku (level 1) — doporučeno pro první session | smíšený tým, nováčci     | Klasický průchod. Prvních ~5 levelů funguje jako tutoriál, za první večer se dá dojít zhruba k levelu 8–10. |
-| Rychlý start (level 7)                              | lidé, kteří shapez znají | Odemčené balancery, rotátory, tunely, lakovna a stacker. Rovnou se staví větší linky.                       |
-| Freeplay (level 27+)                                | dlouhodobý server        | Všechno odemčené, náhodné seedované cíle a soutěž v efektivitě.                                             |
+| Režim                                               | Pro koho                 | Co se stane                                                                                                    |
+| --------------------------------------------------- | ------------------------ | -------------------------------------------------------------------------------------------------------------- |
+| Od začátku (level 1) — doporučeno pro první session | smíšený tým, nováčci     | Klasický průchod. Prvních ~5 levelů funguje jako tutoriál, za první večer se dá dojít zhruba k levelu 8–10.    |
+| Rychlý start (level 7)                              | lidé, kteří shapez znají | Odemčené řezačky, balancery, rotátory, tunely a lakovna (stacker až za level 10). Rovnou se staví větší linky. |
+| Freeplay (level 27+)                                | dlouhodobý server        | Všechno odemčené, náhodné seedované cíle a soutěž v efektivitě.                                                |
 
 Implementace: `CoopGameMode extends RegularGameMode`, při vytvoření světa se nastaví `hubGoals.level` a odemknou se odměny z předchozích levelů.
 
