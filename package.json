@@ -10,6 +10,8 @@
     "scripts": {
         "postinstall": "gulp -f gulp/environment.js prepare",
         "gulp": "gulp --cwd gulp",
+        "build:web": "gulp --cwd gulp package.web.static",
+        "serve:web": "gulp --cwd gulp serve.web",
         "lint": "eslint .",
         "prettier-all": "prettier --write .",
         "package-win32-x64": "gulp --cwd gulp package.standalone.win32-x64",

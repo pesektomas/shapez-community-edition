@@ -1,0 +1,10 @@
+// COOP: Hide features which require the Electron main process on the web platform
+html.p-web {
+    #state_MainMenuState {
+        .exitAppButton,
+        .modsButton,
+        .editMods {
+            display: none !important;
+        }
+    }
+}

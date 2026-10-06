@@ -14,6 +14,7 @@
 @use "states/changelog";
 @use "states/puzzle_menu";
 @use "states/mods";
+@use "platform_web"; // COOP: web platform overrides
 
 @use "ingame_hud/buildings_toolbar";
 @use "ingame_hud/building_placer";

@@ -1,5 +1,7 @@
 import "./core/assert";
 import "./core/polyfills";
+// COOP: Installs the browser replacement for the Electron IPC bridge
+import "./platform/web/install";
 
 import "./mods/modloader";
 

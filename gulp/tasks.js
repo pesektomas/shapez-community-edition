@@ -260,6 +260,18 @@ for (const variant in BUILD_VARIANTS) {
         }
     }
 
+    // COOP: Non-standalone variants are packaged as a static directory
+    // which can be served by any web server (build_output/<variant>)
+    if (!data.standalone) {
+        const outputDir = path.join(buildOutputFolder, variant);
+        const cleanOutput = () =>
+            gulp.src(outputDir, { read: false, allowEmpty: true }).pipe(gulpClean({ force: true }));
+        const copyOutput = () =>
+            gulp.src(path.join(buildFolder, "**/*"), { base: buildFolder }).pipe(gulp.dest(outputDir));
+
+        pack[variant] = { static: gulp.series(full, cleanOutput, copyOutput) };
+    }
+
     // serve
     serve[variant] = gulp.series(build.prepare.dev(variant), () => serveHTML({ version: variant }));
 }

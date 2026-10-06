@@ -16,6 +16,9 @@ import { ClientAPI } from "./platform/api";
 import { Sound } from "./platform/sound";
 import { Storage, STORAGE_SAVES } from "./platform/storage";
 import { PlatformWrapperImplElectron } from "./platform/wrapper";
+// COOP: Web platform support
+import { IS_WEB_PLATFORM } from "./platform/web/install";
+import { PlatformWrapperImplWeb } from "./platform/web/wrapper";
 import { ApplicationSettings } from "./profile/application_settings";
 import { SavegameManager } from "./savegame/savegame_manager";
 import { AboutState } from "./states/about";
@@ -61,7 +64,10 @@ export class Application {
         this.storage = new Storage(this, STORAGE_SAVES);
         await this.storage.initialize();
 
-        this.platformWrapper = new PlatformWrapperImplElectron(this);
+        // COOP: Pick the web wrapper when running outside of Electron
+        this.platformWrapper = IS_WEB_PLATFORM
+            ? new PlatformWrapperImplWeb(this)
+            : new PlatformWrapperImplElectron(this);
 
         // Global stuff
         this.settings = new ApplicationSettings(this, this.storage);
