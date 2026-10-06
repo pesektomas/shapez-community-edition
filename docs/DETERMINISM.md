@@ -112,3 +112,21 @@ nedoporučuji.
 5. Bezztrátový snapshot a doplnění schémat (B), test „save/load = pokračování“.
 6. `Math.pow` v blueprint ceně a `hypot` v `map_chunk` (C).
 7. Replay testy v Playwrightu (vrstvy 3 a 5).
+
+## Stav oprav (fáze 2–5)
+
+| Nález                                 | Stav | Řešení                                                                                      |
+| ------------------------------------- | ---- | ------------------------------------------------------------------------------------------- |
+| A1 tickrate z nastavení               | ✅   | `CoopGameMode.getFixedTickrate()` = 60                                                      |
+| A2 rozpočet ticků, pauza              | ✅   | `CoopSession.performFrame` místo `GameTime.performTicks`, ticky jen podle tahů              |
+| A3 analytika po framech               | ✅   | `productionAnalytics.update()` po každém ticku                                              |
+| A4 délka slice dev/prod               | ⚠️   | Neřešeno konstantou: kontrola verze buildu zajistí stejný build u všech hráčů               |
+| A5 tunnel smartplace                  | ✅   | příznak `tunnelSmartplace` v akci `placeBuilding`                                           |
+| A6 mutace z HUD                       | ✅   | `net/hud_actions.ts`, dev guard na přidání a mazání entit mimo akce                         |
+| A7 seed mapy                          | ✅   | seed volí server, `GameMode.getInitialSeed()`                                               |
+| A8 debug flagy, mody                  | ✅   | kontrola verze (`protokol/commit`), mody na webu nejsou                                     |
+| B snapshot ≠ běžící hra               | ✅   | bezztrátové floaty + `snapshot.ts` extras, ověřeno testem „snapshot restore“ ve 9 scénářích |
+| C1 `Math.pow` v ceně blueprintu       | ✅   | cena jde v akci `pasteBlueprint`                                                            |
+| C2 `Math.hypot` v generování mapy     | ✅   | `Math.sqrt(x*x + y*y)`                                                                      |
+| C3–C5 render-only pole, `Math.random` | ✅   | mimo hash (kamera, waypointy, pinned, realtime), RNG se v simulaci bez seedu nevolá         |
+| extra update po načtení (ingame.js)   | ✅   | v co-op se `stage5FirstUpdate` nesimuluje, jinak by obnovený svět byl o tick napřed         |
