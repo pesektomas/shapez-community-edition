@@ -9,3 +9,9 @@ gulp/runnable-texturepacker.jar
 .zed
 *.log
 .env
+# COOP
+test-results
+playwright-report
+server/node_modules
+server/data
+e2e/node_modules

@@ -1,5 +1,10 @@
 # shapez Community Edition <img src="./electron/favicon.png" alt="shapez Logo" align="right" height="40">
 
+> [!NOTE] > **This fork (Tvarovna)** adds a web build and a co-op multiplayer mode: everybody plays
+> in one shared world in the browser, synchronized with deterministic lockstep.
+> See [PLAN.md](PLAN.md), [docs/COOP.md](docs/COOP.md) (how to run, deploy and test) and
+> [docs/DETERMINISM.md](docs/DETERMINISM.md). Quick start: `docker compose up -d --build`.
+
 **shapez Community Edition** (abbreviated as **CE**) is a community-maintained version of [shapez](https://store.steampowered.com/app/1318690/shapez/)!
 
 CE was created as the tobspr Games team moved away from shapez to work full-time on the upcoming [Shapez 2](https://store.steampowered.com/app/2162800/shapez_2/).
@@ -82,7 +87,7 @@ and does not intend to provide compatibility for older clients.
 You can build without installing Node, Java, or ffmpeg on the host. From the repo root, build the image and run a package task with a volume so output appears in `build_output/` on your machine:
 
 ```bash
-docker build -t shapez-ce-builder .
+docker build -f Dockerfile.builder -t shapez-ce-builder .
 docker run --rm -v "$(pwd)/build_output:/output" shapez-ce-builder package.standalone.linux-x64
 ```
 

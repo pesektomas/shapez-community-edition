@@ -1,0 +1,42 @@
+# Same checks as .github/workflows/coop.yml for Bitbucket
+image: node:22-bookworm
+
+definitions:
+    steps:
+        - step: &server
+              name: Server tests
+              script:
+                  - cd server && npm ci && npm run typecheck && npm test
+        - step: &build
+              name: Build game (dev)
+              script:
+                  - apt-get update && apt-get install -y --no-install-recommends ffmpeg default-jre-headless
+                  - npm ci
+                  - npm run build:web-dev
+              artifacts:
+                  - build_output/web-dev/**
+        - step: &e2e
+              name: E2E (Chromium)
+              image: mcr.microsoft.com/playwright:v1.56.1-noble
+              size: 2x
+              script:
+                  - export CI=1
+                  - npm ci --ignore-scripts
+                  - cd server && npm ci && cd ..
+                  - npx playwright test -c e2e/playwright.config.ts --project=chromium
+              artifacts:
+                  - test-results/**
+
+pipelines:
+    pull-requests:
+        "**":
+            - parallel:
+                  - step: *server
+                  - step: *build
+            - step: *e2e
+    branches:
+        master:
+            - parallel:
+                  - step: *server
+                  - step: *build
+            - step: *e2e

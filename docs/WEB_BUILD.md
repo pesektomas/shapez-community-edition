@@ -35,7 +35,7 @@ npm run serve:web      # dev server s live reloadem na http://localhost:3005
 V Dockeru (stávající builder image):
 
 ```sh
-docker build -t tvarovna-builder .
+docker build -f Dockerfile.builder -t tvarovna-builder .
 docker run --rm -v "$PWD/out:/output" tvarovna-builder package.web.static
 # výsledek: out/web
 ```

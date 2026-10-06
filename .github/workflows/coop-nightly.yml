@@ -1,0 +1,103 @@
+# Nightly: determinism across Chromium, Firefox and WebKit (layer 4), long
+# fuzzing (layer 6), a soak test and the server load test (layer 8).
+name: Co-op nightly
+
+on:
+    schedule:
+        - cron: "17 2 * * *"
+    workflow_dispatch:
+
+jobs:
+    build-game:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 22
+            - uses: actions/setup-java@v4
+              with:
+                  distribution: temurin
+                  java-version: 21
+            - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+            - run: npm ci
+            - run: npm run build:web-dev
+            - uses: actions/upload-artifact@v4
+              with:
+                  name: web-dev
+                  path: build_output/web-dev
+                  retention-days: 3
+
+    cross-browser:
+        needs: build-game
+        runs-on: ubuntu-latest
+        container:
+            image: mcr.microsoft.com/playwright:v1.56.1-noble
+        env:
+            CI: "1"
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/download-artifact@v4
+              with:
+                  name: web-dev
+                  path: build_output/web-dev
+            - run: npm ci --ignore-scripts
+            # The golden hashes were recorded in Chromium, every engine must reproduce them
+            - run: npx playwright test -c e2e/playwright.config.ts --project=chromium --project=firefox --project=webkit tests/determinism.spec.ts -g "golden"
+
+    fuzz:
+        needs: build-game
+        runs-on: ubuntu-latest
+        timeout-minutes: 45
+        container:
+            image: mcr.microsoft.com/playwright:v1.56.1-noble
+        env:
+            CI: "1"
+            FUZZ_RUNS: "40"
+            FUZZ_TURNS: "1500"
+            FUZZ_OFFSET: ${{ github.run_number }}000
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/download-artifact@v4
+              with:
+                  name: web-dev
+                  path: build_output/web-dev
+            - run: npm ci --ignore-scripts
+            - run: npx playwright test -c e2e/playwright.config.ts --project=chromium tests/fuzz.spec.ts
+            - uses: actions/upload-artifact@v4
+              if: failure()
+              with:
+                  name: fuzz-desync
+                  path: test-results
+
+    soak:
+        needs: build-game
+        runs-on: ubuntu-latest
+        timeout-minutes: 90
+        container:
+            image: mcr.microsoft.com/playwright:v1.56.1-noble
+        env:
+            CI: "1"
+            MP_DURATION_S: "3600"
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/download-artifact@v4
+              with:
+                  name: web-dev
+                  path: build_output/web-dev
+            - run: npm ci --ignore-scripts
+            - run: npm ci
+              working-directory: server
+            - run: npx playwright test -c e2e/playwright.config.ts --project=chromium tests/multiplayer.spec.ts -g "concurrent"
+
+    load:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 22
+            - run: npm ci
+              working-directory: server
+            - run: npm run bots
+              working-directory: server

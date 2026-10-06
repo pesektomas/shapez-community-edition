@@ -1,0 +1,116 @@
+# Tvarovna on Kubernetes: one replica (the server keeps the worlds in memory
+# and in SQLite on the volume), PVC for /data, Service and Ingress with
+# WebSocket support (ingress-nginx).
+#   kubectl apply -f deploy/k8s/tvarovna.yaml
+# Adjust the image, host and TLS secret below. The server writes a daily
+# backup of the database to /data/backups (keeps 7), copy them off the cluster.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+    name: tvarovna-data
+spec:
+    accessModes: ["ReadWriteOnce"]
+    resources:
+        requests:
+            storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: tvarovna
+    labels:
+        app: tvarovna
+spec:
+    replicas: 1
+    # Never run two servers on the same SQLite file
+    strategy:
+        type: Recreate
+    selector:
+        matchLabels:
+            app: tvarovna
+    template:
+        metadata:
+            labels:
+                app: tvarovna
+        spec:
+            securityContext:
+                fsGroup: 1000
+            terminationGracePeriodSeconds: 20
+            containers:
+                - name: tvarovna
+                  image: ghcr.io/pesektomas/tvarovna:latest
+                  ports:
+                      - name: http
+                        containerPort: 8080
+                  env:
+                      - name: SOURCE_URL
+                        value: https://github.com/pesektomas/shapez-community-edition
+                      - name: SERVER_PASSWORD
+                        valueFrom:
+                            secretKeyRef:
+                                name: tvarovna
+                                key: server-password
+                                optional: true
+                  volumeMounts:
+                      - name: data
+                        mountPath: /data
+                  readinessProbe:
+                      httpGet:
+                          path: /healthz
+                          port: http
+                      periodSeconds: 10
+                  livenessProbe:
+                      httpGet:
+                          path: /healthz
+                          port: http
+                      periodSeconds: 30
+                      failureThreshold: 3
+                  resources:
+                      requests:
+                          cpu: 100m
+                          memory: 256Mi
+                      limits:
+                          memory: 1Gi
+            volumes:
+                - name: data
+                  persistentVolumeClaim:
+                      claimName: tvarovna-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: tvarovna
+spec:
+    selector:
+        app: tvarovna
+    ports:
+        - name: http
+          port: 80
+          targetPort: http
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+    name: tvarovna
+    annotations:
+        # WebSockets stay open for hours
+        nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+        nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+        nginx.ingress.kubernetes.io/proxy-body-size: "16m"
+        # cert-manager.io/cluster-issuer: letsencrypt
+spec:
+    ingressClassName: nginx
+    tls:
+        - hosts: ["tvarovna.example.com"]
+          secretName: tvarovna-tls
+    rules:
+        - host: tvarovna.example.com
+          http:
+              paths:
+                  - path: /
+                    pathType: Prefix
+                    backend:
+                        service:
+                            name: tvarovna
+                            port:
+                                name: http

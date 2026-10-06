@@ -1,0 +1,22 @@
+# Local run or a single VPS:  docker compose up -d --build
+# Then open http://localhost:8080 (put a TLS proxy like Caddy or Traefik in front for the internet)
+services:
+    tvarovna:
+        build: .
+        image: tvarovna:latest
+        ports:
+            - "${PORT:-8080}:8080"
+        environment:
+            # Optional global password for creating and joining worlds
+            SERVER_PASSWORD: ${SERVER_PASSWORD:-}
+            # Shown in the game, the GPL requires the source to be available
+            SOURCE_URL: ${SOURCE_URL:-https://github.com/pesektomas/shapez-community-edition}
+            LOG_LEVEL: ${LOG_LEVEL:-info}
+            BACKUP_INTERVAL_HOURS: "24"
+            BACKUP_KEEP: "7"
+        volumes:
+            - tvarovna-data:/data
+        restart: unless-stopped
+
+volumes:
+    tvarovna-data: {}

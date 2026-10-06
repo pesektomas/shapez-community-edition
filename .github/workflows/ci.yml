@@ -30,7 +30,7 @@ jobs:
             - name: Build Docker image
               env:
                   DOCKER_BUILDKIT: 1
-              run: docker build -t shapez-ce-builder .
+              run: docker build -f Dockerfile.builder -t shapez-ce-builder .
             - name: Build linux-x64 and win32-x64
               run: >
                 docker run --rm

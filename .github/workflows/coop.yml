@@ -1,0 +1,77 @@
+# Co-op tests on every PR: server unit + protocol tests (layers 1-2),
+# determinism replay + golden hashes + snapshot restore (layers 3, 5) and the
+# multiplayer E2E scenarios (layer 7) in Chromium.
+name: Co-op
+
+on:
+    push:
+        branches: [master]
+    pull_request:
+
+jobs:
+    server:
+        name: Server tests
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 22
+            - run: npm ci
+              working-directory: server
+            - run: npm run typecheck
+              working-directory: server
+            - run: npm test
+              working-directory: server
+
+    build-game:
+        name: Build game (dev)
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 22
+            - uses: actions/setup-java@v4
+              with:
+                  distribution: temurin
+                  java-version: 21
+            - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+            - run: npm ci
+            - run: npm run build:web-dev
+            - uses: actions/upload-artifact@v4
+              with:
+                  name: web-dev
+                  path: build_output/web-dev
+                  retention-days: 3
+
+    e2e:
+        name: E2E (Chromium)
+        needs: build-game
+        runs-on: ubuntu-latest
+        container:
+            image: mcr.microsoft.com/playwright:v1.56.1-noble
+        env:
+            CI: "1"
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/download-artifact@v4
+              with:
+                  name: web-dev
+                  path: build_output/web-dev
+            - run: npm ci --ignore-scripts
+            - run: npm ci
+              working-directory: server
+            - name: Determinism (replay, golden hashes, snapshot restore)
+              run: npx playwright test -c e2e/playwright.config.ts --project=chromium tests/determinism.spec.ts
+            - name: Fuzz (short)
+              run: npx playwright test -c e2e/playwright.config.ts --project=chromium tests/fuzz.spec.ts
+            - name: Multiplayer and robustness
+              run: npx playwright test -c e2e/playwright.config.ts --project=chromium tests/multiplayer.spec.ts tests/robustness.spec.ts tests/ui.spec.ts
+            - uses: actions/upload-artifact@v4
+              if: failure()
+              with:
+                  name: e2e-results
+                  path: |
+                      test-results
+                      e2e/playwright-report

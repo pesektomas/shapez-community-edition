@@ -7,16 +7,18 @@ Tento dokument je zadání pro Claude Code. Postupuj po fázích, každou fázi 
 
 ## Stav fází
 
-| Fáze                              | Stav                        | Poznámka                                                                             |
-| --------------------------------- | --------------------------- | ------------------------------------------------------------------------------------ |
-| 0 – Příprava a audit determinismu | ✅                          | `upstream` remote, audit v [docs/DETERMINISM.md](docs/DETERMINISM.md)                |
-| 1 – Webový build                  | ✅ (Chromium)               | `npm run build:web` → `build_output/web`, viz [docs/WEB_BUILD.md](docs/WEB_BUILD.md) |
-| 2 – Deterministické jádro offline | ⏳ čeká na schválení auditu |                                                                                      |
-| 3 – Server a netcode              | —                           |                                                                                      |
-| 4 – Co-op UX                      | —                           |                                                                                      |
-| 5 – Robustnost                    | —                           |                                                                                      |
-| 6 – Nasazení                      | —                           |                                                                                      |
-| 7 – Playtest                      | —                           |                                                                                      |
+| Fáze                              | Stav           | Poznámka                                                                             |
+| --------------------------------- | -------------- | ------------------------------------------------------------------------------------ |
+| 0 – Příprava a audit determinismu | ✅             | `upstream` remote, audit v [docs/DETERMINISM.md](docs/DETERMINISM.md)                |
+| 1 – Webový build                  | ✅ (Chromium)  | `npm run build:web` → `build_output/web`, viz [docs/WEB_BUILD.md](docs/WEB_BUILD.md) |
+| 2 – Deterministické jádro offline | ✅             | lockstep, akce, bezztrátový snapshot, 9 scénářů, golden hashe                        |
+| 3 – Server a netcode              | ✅             | `server/` (fastify, ws, node:sqlite), join přes snapshot                             |
+| 4 – Co-op UX                      | ✅             | úvodní stránka, pozvánky, hráči, chat, kurzory, ghosty, notifikace, undo             |
+| 5 – Robustnost                    | ✅             | resync, reconnect, kontrola verze, limity, E2E 3–7, fuzz                             |
+| 6 – Nasazení                      | ✅ (neověřeno) | Dockerfile, compose, k8s, CI. Docker build a veřejnou doménu tu nešlo ověřit         |
+| 7 – Playtest                      | —              | na týmu                                                                              |
+
+Spuštění, nasazení a testy: [docs/COOP.md](docs/COOP.md).
 
 ## 1. Shrnutí v jednom odstavci
 
