@@ -14,6 +14,7 @@ import { KEYMAPPINGS } from "../../key_action_mapper";
 import { defaultBuildingVariant, MetaBuilding } from "../../meta_building";
 import { enumHubGoalRewards } from "../../tutorial_goals";
 import { BaseHUDPart } from "../base_hud_part";
+import { coopDeleteEntities, coopPlaceBuilding } from "../../../net/hud_actions"; // COOP
 
 /**
  * Contains all logic for the building placer - this doesn't include the rendering
@@ -330,7 +331,12 @@ export class HUDBuildingPlacerLogic extends BaseHUDPart {
         const tile = worldPos.toTileSpace();
         const contents = this.root.map.getTileContent(tile, this.root.currentLayer);
         if (contents) {
-            if (this.root.logic.tryDeleteBuilding(contents)) {
+            // COOP: Deletions are sent as actions
+            if (
+                this.root.coop
+                    ? coopDeleteEntities(this.root, [contents])
+                    : this.root.logic.tryDeleteBuilding(contents)
+            ) {
                 this.root.soundProxy.playUi(SOUNDS.destroyBuilding);
                 return true;
             }
@@ -441,6 +447,21 @@ export class HUDBuildingPlacerLogic extends BaseHUDPart {
         }
 
         const metaBuilding = this.currentMetaBuilding.get();
+
+        // COOP: Placements are sent as actions, the rotation is computed when applied
+        if (this.root.coop) {
+            const placed = coopPlaceBuilding(this.root, {
+                tile,
+                rotation: this.currentBaseRotation,
+                variant: this.currentVariant.get(),
+                building: metaBuilding,
+            });
+            if (placed) {
+                this.onBuildingPlaced(metaBuilding);
+            }
+            return placed;
+        }
+
         const { rotation, rotationVariant } = metaBuilding.computeOptimalDirectionAndRotationVariantAtTile({
             root: this.root,
             tile,
@@ -461,29 +482,36 @@ export class HUDBuildingPlacerLogic extends BaseHUDPart {
         if (entity) {
             // Succesfully placed, find which entity we actually placed
             this.root.signals.entityManuallyPlaced.dispatch(entity);
-
-            // Check if we should flip the orientation (used for tunnels)
-            if (
-                metaBuilding.getFlipOrientationAfterPlacement() &&
-                !this.root.keyMapper.getBinding(
-                    KEYMAPPINGS.placementModifiers.placementDisableAutoOrientation
-                ).pressed
-            ) {
-                this.currentBaseRotation = (180 + this.currentBaseRotation) % 360;
-            }
-
-            // Check if we should stop placement
-            if (
-                !metaBuilding.getStayInPlacementMode() &&
-                !this.root.keyMapper.getBinding(KEYMAPPINGS.placementModifiers.placeMultiple).pressed &&
-                !this.root.app.settings.getAllSettings().alwaysMultiplace
-            ) {
-                // Stop placement
-                this.currentMetaBuilding.set(null);
-            }
+            this.onBuildingPlaced(metaBuilding);
             return true;
         } else {
             return false;
+        }
+    }
+
+    /**
+     * COOP: Extracted from tryPlaceCurrentBuildingAt, updates the placement
+     * state after a building was placed
+     * @param {MetaBuilding} metaBuilding
+     */
+    onBuildingPlaced(metaBuilding) {
+        // Check if we should flip the orientation (used for tunnels)
+        if (
+            metaBuilding.getFlipOrientationAfterPlacement() &&
+            !this.root.keyMapper.getBinding(KEYMAPPINGS.placementModifiers.placementDisableAutoOrientation)
+                .pressed
+        ) {
+            this.currentBaseRotation = (180 + this.currentBaseRotation) % 360;
+        }
+
+        // Check if we should stop placement
+        if (
+            !metaBuilding.getStayInPlacementMode() &&
+            !this.root.keyMapper.getBinding(KEYMAPPINGS.placementModifiers.placeMultiple).pressed &&
+            !this.root.app.settings.getAllSettings().alwaysMultiplace
+        ) {
+            // Stop placement
+            this.currentMetaBuilding.set(null);
         }
     }
 
@@ -784,7 +812,12 @@ export class HUDBuildingPlacerLogic extends BaseHUDPart {
                         // Deletion
                         const contents = this.root.map.getLayerContentXY(x0, y0, this.root.currentLayer);
                         if (contents && !contents.queuedForDestroy && !contents.destroyed) {
-                            if (this.root.logic.tryDeleteBuilding(contents)) {
+                            // COOP: Deletions are sent as actions
+                            if (
+                                this.root.coop
+                                    ? coopDeleteEntities(this.root, [contents])
+                                    : this.root.logic.tryDeleteBuilding(contents)
+                            ) {
                                 anythingDeleted = true;
                             }
                         }

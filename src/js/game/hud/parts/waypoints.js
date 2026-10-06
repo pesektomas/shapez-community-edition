@@ -24,6 +24,7 @@ import { ShapeDefinition } from "../../shape_definition";
 import { BaseHUDPart } from "../base_hud_part";
 import { DynamicDomAttach } from "../dynamic_dom_attach";
 import { enumNotificationType } from "./notifications";
+import { coopAddWaypoint, coopRemoveWaypoint, coopRenameWaypoint } from "../../../net/hud_actions"; // COOP
 
 /** @typedef {{
  *   label: string | null,
@@ -299,11 +300,21 @@ export class HUDWaypoints extends BaseHUDPart {
         if (waypoint) {
             dialog.buttonSignals.ok.add(() => {
                 // Actually rename the waypoint
-                this.renameWaypoint(waypoint, markerNameInput.getValue());
+                // COOP: Waypoints are shared, sent as action
+                if (this.root.coop) {
+                    coopRenameWaypoint(this.root, waypoint, markerNameInput.getValue());
+                } else {
+                    this.renameWaypoint(waypoint, markerNameInput.getValue());
+                }
             });
             dialog.buttonSignals.delete.add(() => {
                 // Actually delete the waypoint
-                this.deleteWaypoint(waypoint);
+                // COOP: Waypoints are shared, sent as action
+                if (this.root.coop) {
+                    coopRemoveWaypoint(this.root, waypoint);
+                } else {
+                    this.deleteWaypoint(waypoint);
+                }
             });
         } else {
             // Compute where to create the marker
@@ -311,7 +322,12 @@ export class HUDWaypoints extends BaseHUDPart {
 
             dialog.buttonSignals.ok.add(() => {
                 // Actually create the waypoint
-                this.addWaypoint(markerNameInput.getValue(), center);
+                // COOP: Waypoints are shared, sent as action
+                if (this.root.coop) {
+                    coopAddWaypoint(this.root, markerNameInput.getValue(), center);
+                } else {
+                    this.addWaypoint(markerNameInput.getValue(), center);
+                }
             });
         }
     }

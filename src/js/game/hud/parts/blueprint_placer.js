@@ -10,6 +10,7 @@ import { enumMouseButton } from "../../camera";
 import { KEYMAPPINGS } from "../../key_action_mapper";
 import { BaseHUDPart } from "../base_hud_part";
 import { DynamicDomAttach } from "../dynamic_dom_attach";
+import { coopPasteBlueprint } from "../../../net/hud_actions"; // COOP
 
 export class HUDBlueprintPlacer extends BaseHUDPart {
     createElements(parent) {
@@ -125,7 +126,12 @@ export class HUDBlueprintPlacer extends BaseHUDPart {
 
             const worldPos = this.root.camera.screenToWorld(pos);
             const tile = worldPos.toTileSpace();
-            if (blueprint.tryPlace(this.root, tile)) {
+            // COOP: Pastes are sent as actions
+            if (
+                this.root.coop
+                    ? coopPasteBlueprint(this.root, blueprint, tile)
+                    : blueprint.tryPlace(this.root, tile)
+            ) {
                 this.root.soundProxy.playUi(SOUNDS.placeBuilding);
             }
             return STOP_PROPAGATION;

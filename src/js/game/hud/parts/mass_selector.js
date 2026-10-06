@@ -11,6 +11,7 @@ import { KEYMAPPINGS } from "../../key_action_mapper";
 import { THEME } from "../../theme";
 import { enumHubGoalRewards } from "../../tutorial_goals";
 import { BaseHUDPart } from "../base_hud_part";
+import { coopClearBelts, coopDeleteUids } from "../../../net/hud_actions"; // COOP
 
 /* typehints:start */
 // @ts-ignore
@@ -96,6 +97,13 @@ export class HUDMassSelector extends BaseHUDPart {
     doDelete() {
         const entityUids = Array.from(this.selectedUids);
 
+        // COOP: Deletions are sent as actions
+        if (this.root.coop) {
+            coopDeleteUids(this.root, entityUids);
+            this.selectedUids = new Set();
+            return;
+        }
+
         // Build mapping from uid to entity
         /**
          * @type {Map<number, Entity>}
@@ -149,6 +157,13 @@ export class HUDMassSelector extends BaseHUDPart {
     }
 
     clearBelts() {
+        // COOP: Sent as action
+        if (this.root.coop) {
+            coopClearBelts(this.root, Array.from(this.selectedUids));
+            this.selectedUids = new Set();
+            return;
+        }
+
         for (const uid of this.selectedUids) {
             const entity = this.root.entityMgr.findByUid(uid);
             for (const component of Object.values(entity.components)) {
@@ -185,6 +200,14 @@ export class HUDMassSelector extends BaseHUDPart {
 
             // copy code relies on entities still existing, so must copy before deleting.
             this.root.hud.signals.buildingsSelectedForBlueprint.dispatch(entityUids, true);
+
+            // COOP: Deletions are sent as actions
+            if (this.root.coop) {
+                coopDeleteUids(this.root, entityUids);
+                this.selectedUids = new Set();
+                this.root.soundProxy.playUiClick();
+                return;
+            }
 
             for (let i = 0; i < entityUids.length; ++i) {
                 const uid = entityUids[i];

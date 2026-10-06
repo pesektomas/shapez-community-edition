@@ -50,6 +50,12 @@ export class GameCreationPayload {
 
         /** @type {object|undefined} */
         this.gameModeParameters;
+
+        /**
+         * COOP: Session of a co-op game
+         * @type {import("../net/coop_session").CoopSession|undefined}
+         */
+        this.coopSession;
     }
 }
 
@@ -307,7 +313,11 @@ export class InGameState extends GameState {
     stage5FirstUpdate() {
         if (this.switchStage(GAME_LOADING_STATES.s5_firstUpdate)) {
             this.core.root.logicInitialized = true;
-            this.core.updateLogic();
+            // COOP: In co-op, every tick has to come from the lockstep, otherwise
+            // a restored snapshot would be one tick ahead of the other players
+            if (!this.core.root.coop) {
+                this.core.updateLogic();
+            }
             this.stage6PostLoadHook();
         }
     }
@@ -320,6 +330,9 @@ export class InGameState extends GameState {
         if (this.switchStage(GAME_LOADING_STATES.s6_postLoadHook)) {
             logger.log("Post load hook");
             this.core.postLoadHook();
+            if (this.core.root.coop) {
+                this.core.root.coop.onGameLoaded(); // COOP
+            }
             this.stage7Warmup();
         }
     }

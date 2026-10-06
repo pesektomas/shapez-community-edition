@@ -2,6 +2,7 @@ import { STOP_PROPAGATION } from "../../../core/signal";
 import { Vector } from "../../../core/vector";
 import { enumMouseButton } from "../../camera";
 import { BaseHUDPart } from "../base_hud_part";
+import { coopDeleteEntities, coopToggleLever } from "../../../net/hud_actions"; // COOP
 
 export class HUDLeverToggle extends BaseHUDPart {
     initialize() {
@@ -19,11 +20,21 @@ export class HUDLeverToggle extends BaseHUDPart {
             const leverComp = contents.components.Lever;
             if (leverComp) {
                 if (button === enumMouseButton.left) {
-                    leverComp.toggled = !leverComp.toggled;
+                    // COOP: Sent as action
+                    if (this.root.coop) {
+                        coopToggleLever(this.root, contents.uid);
+                    } else {
+                        leverComp.toggled = !leverComp.toggled;
+                    }
                     return STOP_PROPAGATION;
                 } else if (button === enumMouseButton.right) {
                     if (!this.root.hud.parts.buildingPlacer.currentMetaBuilding) {
-                        this.root.logic.tryDeleteBuilding(contents);
+                        // COOP: Sent as action
+                        if (this.root.coop) {
+                            coopDeleteEntities(this.root, [contents]);
+                        } else {
+                            this.root.logic.tryDeleteBuilding(contents);
+                        }
                     }
                     return STOP_PROPAGATION;
                 }

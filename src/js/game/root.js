@@ -138,6 +138,12 @@ export class GameRoot {
         /** @type {GameMode} */
         this.gameMode = null;
 
+        /**
+         * COOP: The co-op session, if this is a co-op game
+         * @type {import("../net/coop_session").CoopSession | null}
+         */
+        this.coop = null;
+
         this.signals = {
             // Entities
             entityManuallyPlaced: /** @type {Signal<[Entity]>} */ (new Signal()),

@@ -6,6 +6,7 @@ import { T } from "../../../translations";
 import { KEYMAPPINGS, KeyActionMapper } from "../../key_action_mapper";
 import { BaseHUDPart } from "../base_hud_part";
 import { DynamicDomAttach } from "../dynamic_dom_attach";
+import { coopUnlockUpgrade } from "../../../net/hud_actions"; // COOP
 
 export class HUDShop extends BaseHUDPart {
     createElements(parent) {
@@ -242,7 +243,12 @@ export class HUDShop extends BaseHUDPart {
     }
 
     tryUnlockNextTier(upgradeId) {
-        if (this.root.hubGoals.tryUnlockUpgrade(upgradeId)) {
+        // COOP: Purchases are sent as actions
+        if (
+            this.root.coop
+                ? coopUnlockUpgrade(this.root, upgradeId)
+                : this.root.hubGoals.tryUnlockUpgrade(upgradeId)
+        ) {
             this.root.app.sound.playUiSound(SOUNDS.unlockUpgrade);
         }
     }

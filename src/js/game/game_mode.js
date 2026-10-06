@@ -186,6 +186,15 @@ export class GameMode extends BasicSerializableObject {
         return;
     }
 
+    // COOP: Hooks used by the co-op mode to create a deterministic world
+    /** @returns {number | undefined} */
+    getInitialSeed() {
+        return;
+    }
+
+    /** Called after a new game was initialized (not after loading one) */
+    onNewGameInitialized() {}
+
     /** @returns {string} */
     getBlueprintShapeKey() {
         return "CbCbCbRb:CwCwCwCw";

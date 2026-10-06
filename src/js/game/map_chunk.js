@@ -281,7 +281,10 @@ export class MapChunk {
         }
 
         const chunkCenter = new Vector(this.x, this.y).addScalar(0.5);
-        const distanceToOriginInChunks = Math.round(chunkCenter.length());
+        // COOP: Math.hypot is not guaranteed to round identically across engines, sqrt is
+        const distanceToOriginInChunks = Math.round(
+            Math.sqrt(chunkCenter.x * chunkCenter.x + chunkCenter.y * chunkCenter.y)
+        );
 
         this.generatePatches({ rng, chunkCenter, distanceToOriginInChunks });
     }

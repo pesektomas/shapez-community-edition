@@ -5,6 +5,7 @@ import { BasicSerializableObject } from "./serialization";
 
 import { round4Digits } from "../core/utils";
 import { Vector } from "../core/vector";
+import { serializeNumber } from "./serialization_options"; // COOP
 export const globalJsonSchemaDefs = {};
 
 /**
@@ -347,8 +348,9 @@ export class TypeVector extends BaseDataType {
     serialize(value) {
         assert(value instanceof Vector, "Type vector got non vector for serialize: " + value);
         return {
-            x: round4Digits(value.x),
-            y: round4Digits(value.y),
+            // COOP: Lossless in co-op snapshots
+            x: serializeNumber(value.x, round4Digits),
+            y: serializeNumber(value.y, round4Digits),
         };
     }
 
@@ -439,7 +441,7 @@ export class TypeNumber extends BaseDataType {
     serialize(value) {
         assert(Number.isFinite(value), "Type number got non number for serialize: " + value);
         assert(!Number.isNaN(value), "Value is nan: " + value);
-        return round4Digits(value);
+        return serializeNumber(value, round4Digits); // COOP: lossless in co-op snapshots
     }
 
     getAsJsonSchemaUncached() {
@@ -475,7 +477,7 @@ export class TypePositiveNumber extends BaseDataType {
     serialize(value) {
         assert(Number.isFinite(value), "Type number got non number for serialize: " + value);
         assert(value >= 0, "Postitive number got negative value: " + value);
-        return round4Digits(value);
+        return serializeNumber(value, round4Digits); // COOP: lossless in co-op snapshots
     }
 
     /**

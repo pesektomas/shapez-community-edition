@@ -6,6 +6,17 @@ export class ConstantSignalSystem extends GameSystemWithFilter {
         super(root, [ConstantSignalComponent]);
 
         this.root.signals.entityManuallyPlaced.add(entity => {
+            // COOP: Only the player who placed it edits the signal
+            const coopAction = this.root.coop && this.root.coop.currentAction;
+            if (
+                coopAction &&
+                (coopAction.playerId !== this.root.coop.playerId ||
+                    coopAction.type !== "placeBuilding" ||
+                    !coopAction.payload.editSignal)
+            ) {
+                return;
+            }
+
             const editorHud = this.root.hud.parts.constantSignalEdit;
             if (editorHud) {
                 editorHud.editConstantSignal(entity, { deleteOnCancel: true });

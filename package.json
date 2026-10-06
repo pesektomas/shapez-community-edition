@@ -12,6 +12,7 @@
         "gulp": "gulp --cwd gulp",
         "build:web": "gulp --cwd gulp package.web.static",
         "serve:web": "gulp --cwd gulp serve.web",
+        "build:web-dev": "gulp --cwd gulp package.web.dev",
         "lint": "eslint .",
         "prettier-all": "prettier --write .",
         "package-win32-x64": "gulp --cwd gulp package.standalone.win32-x64",
@@ -32,6 +33,7 @@
     "devDependencies": {
         "@electron/packager": "^18.3.6",
         "@eslint/js": "^9.24.0",
+        "@playwright/test": "^1.56.1",
         "@rspack/core": "^1.7.2",
         "@tsconfig/node-lts": "^22.0.1",
         "@tsconfig/strictest": "^2.0.5",

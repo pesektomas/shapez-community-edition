@@ -110,7 +110,8 @@ export class HubGoals extends BasicSerializableObject {
         this.computeNextGoal();
 
         // Allow quickly switching goals in dev mode
-        if (G_IS_DEV) {
+        // COOP: Not in co-op, this would change the state outside of the lockstep
+        if (G_IS_DEV && !root.coop) {
             window.addEventListener("keydown", ev => {
                 if (ev.key === "p") {
                     // root is not guaranteed to exist within ~0.5s after loading in

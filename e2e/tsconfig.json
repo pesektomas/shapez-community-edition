@@ -1,0 +1,11 @@
+{
+    "extends": "@tsconfig/node-lts/tsconfig",
+    "compilerOptions": {
+        "noEmit": true,
+        "module": "nodenext",
+        "moduleResolution": "nodenext",
+        "allowImportingTsExtensions": true,
+        "strict": false
+    },
+    "include": ["./**/*.ts", "../shared/**/*.ts"]
+}

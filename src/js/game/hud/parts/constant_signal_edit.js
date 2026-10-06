@@ -13,6 +13,7 @@ import { COLOR_ITEM_SINGLETONS } from "../../items/color_item";
 import { BaseHUDPart } from "../base_hud_part";
 import { enumColors } from "../../colors";
 import { ShapeDefinition } from "../../shape_definition";
+import { coopDeleteEntities, coopSetConstantSignal } from "../../../net/hud_actions"; // COOP
 
 /** @type {{
  * [x: string]: (entity: Entity) => BaseItem
@@ -139,10 +140,15 @@ export class HUDConstantSignalEdit extends BaseHUDPart {
                 return;
             }
 
-            if (itemInput.chosenItem) {
-                constantComp.signal = itemInput.chosenItem;
+            const signal = itemInput.chosenItem
+                ? itemInput.chosenItem
+                : this.parseSignalCode(entity, signalValueInput.getValue());
+
+            // COOP: Sent as action
+            if (this.root.coop) {
+                coopSetConstantSignal(this.root, uid, signal);
             } else {
-                constantComp.signal = this.parseSignalCode(entity, signalValueInput.getValue());
+                constantComp.signal = signal;
             }
         };
 
@@ -174,7 +180,12 @@ export class HUDConstantSignalEdit extends BaseHUDPart {
                     return;
                 }
 
-                this.root.logic.tryDeleteBuilding(entityRef);
+                // COOP: Sent as action
+                if (this.root.coop) {
+                    coopDeleteEntities(this.root, [entityRef]);
+                } else {
+                    this.root.logic.tryDeleteBuilding(entityRef);
+                }
             });
         }
     }

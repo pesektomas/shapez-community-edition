@@ -23,6 +23,8 @@ import { ApplicationSettings } from "./profile/application_settings";
 import { SavegameManager } from "./savegame/savegame_manager";
 import { AboutState } from "./states/about";
 import { ChangelogState } from "./states/changelog";
+import { CoopState } from "./states/coop"; // COOP
+import { installCoopTestApi } from "./net/test_api"; // COOP
 import { InGameState } from "./states/ingame";
 import { KeybindingsState } from "./states/keybindings";
 import { LoginState } from "./states/login";
@@ -108,6 +110,11 @@ export class Application {
         this.registerStates();
         this.registerEventListeners();
 
+        // COOP: Test hooks for the multiplayer tests
+        if (G_IS_DEV) {
+            installCoopTestApi(this);
+        }
+
         Loader.linkAppAfterBoot(this);
 
         this.stateMgr.moveToState("PreloadState");
@@ -138,6 +145,7 @@ export class Application {
             PuzzleMenuState,
             LoginState,
             ModsState,
+            CoopState, // COOP
         ];
 
         for (let i = 0; i < states.length; ++i) {

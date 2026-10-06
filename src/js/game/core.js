@@ -91,6 +91,11 @@ export class GameCore {
         // This isn't nice, but we need it right here
         root.keyMapper = new KeyActionMapper(root, this.root.gameState.inputReceiver);
 
+        // COOP: Attach the co-op session before anything else, it watches entity changes
+        if (parentState.creationPayload.coopSession) {
+            root.coop = parentState.creationPayload.coopSession;
+        }
+
         // Init game mode
         root.gameMode = GameMode.create(root, gameModeId, parentState.creationPayload.gameModeParameters);
 
@@ -116,6 +121,11 @@ export class GameCore {
 
         // Initialize the hud once everything is loaded
         this.root.hud.initialize();
+
+        // COOP
+        if (root.coop) {
+            root.coop.attach(root);
+        }
 
         // Initial resize event, it might be possible that the screen
         // resized later during init tho, which is why will emit it later
@@ -156,9 +166,11 @@ export class GameCore {
     initNewGame() {
         logger.log("Initializing new game");
         this.root.gameIsFresh = true;
-        this.root.map.seed = randomInt(0, 100000);
+        // COOP: The game mode can provide a fixed seed
+        this.root.map.seed = this.root.gameMode.getInitialSeed() ?? randomInt(0, 100000);
 
         if (!this.root.gameMode.hasHub()) {
+            this.root.gameMode.onNewGameInitialized(); // COOP
             return;
         }
 
@@ -174,6 +186,7 @@ export class GameCore {
         this.root.map.placeStaticEntity(hub);
         this.root.entityMgr.registerEntity(hub);
         this.root.camera.center = new Vector(-5, 2).multiplyScalar(globalConfig.tileSize);
+        this.root.gameMode.onNewGameInitialized(); // COOP
     }
 
     /**
@@ -234,7 +247,10 @@ export class GameCore {
         // Camera is always updated, no matter what
         root.camera.update(deltaMs);
 
-        if (!(G_IS_DEV && globalConfig.debug.manualTickOnly)) {
+        if (root.coop) {
+            // COOP: Ticks are driven by the lockstep turns, never paused or dropped
+            root.coop.performFrame(deltaMs, this.boundInternalTick);
+        } else if (!(G_IS_DEV && globalConfig.debug.manualTickOnly)) {
             // Perform logic ticks
             this.root.time.performTicks(deltaMs, this.boundInternalTick);
 

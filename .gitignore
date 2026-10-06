@@ -55,3 +55,8 @@ translations/tmp
 gulp/additional_build_files
 
 electron/dist
+
+# COOP: test artifacts
+test-results
+playwright-report
+e2e/playwright-report

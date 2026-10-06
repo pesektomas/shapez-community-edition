@@ -51,7 +51,12 @@ export class UndergroundBeltSystem extends GameSystemWithFilter {
      * @param {Entity} entity
      */
     onEntityManuallyPlaced(entity) {
-        if (!this.root.app.settings.getAllSettings().enableTunnelSmartplace) {
+        // COOP: In co-op the setting of the placing player travels with the action
+        const smartplace = this.root.coop
+            ? this.root.coop.currentAction?.type === "placeBuilding" &&
+              this.root.coop.currentAction.payload.tunnelSmartplace
+            : this.root.app.settings.getAllSettings().enableTunnelSmartplace;
+        if (!smartplace) {
             // Smart-place disabled
             return;
         }

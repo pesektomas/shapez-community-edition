@@ -269,7 +269,17 @@ for (const variant in BUILD_VARIANTS) {
         const copyOutput = () =>
             gulp.src(path.join(buildFolder, "**/*"), { base: buildFolder }).pipe(gulp.dest(outputDir));
 
-        pack[variant] = { static: gulp.series(full, cleanOutput, copyOutput) };
+        // Development build (asserts, test hooks) for the automated tests
+        const devOutputDir = path.join(buildOutputFolder, variant + "-dev");
+        const cleanDevOutput = () =>
+            gulp.src(devOutputDir, { read: false, allowEmpty: true }).pipe(gulpClean({ force: true }));
+        const copyDevOutput = () =>
+            gulp.src(path.join(buildFolder, "**/*"), { base: buildFolder }).pipe(gulp.dest(devOutputDir));
+
+        pack[variant] = {
+            static: gulp.series(full, cleanOutput, copyOutput),
+            dev: gulp.series(build.prepare.dev(variant), cleanDevOutput, copyDevOutput),
+        };
     }
 
     // serve
