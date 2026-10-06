@@ -7,6 +7,7 @@ import { Logger } from "../core/logging";
 import { getRandomHint } from "../game/hints";
 import { HUDModalDialogs } from "../game/hud/parts/modal_dialogs";
 import { T, autoDetectLanguageId, updateApplicationLanguage } from "../translations";
+import { IS_WEB_PLATFORM } from "../platform/web/install"; // COOP
 
 const logger = new Logger("state/preload");
 
@@ -175,7 +176,8 @@ export class PreloadState extends GameState {
             .then(() => this.setStatus("Launching", 99))
             .then(
                 () => {
-                    this.moveToState("MainMenuState");
+                    // COOP: The web build starts with the co-op menu
+                    this.moveToState(IS_WEB_PLATFORM ? "CoopState" : "MainMenuState");
                 },
                 err => {
                     this.showFailMessage(err);

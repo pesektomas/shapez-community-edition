@@ -27,6 +27,15 @@ const CATCHUP_FRAME_BUDGET_MS = 25;
 const MAX_UNDO_STEPS = 100;
 
 /**
+ * Sequence numbers of sent actions. They must increase across sessions and
+ * page reloads, the server drops resent actions it already got.
+ */
+let lastClientSeq = Date.now() * 1000;
+function nextClientSeq() {
+    return ++lastClientSeq;
+}
+
+/**
  * Connection between the session and the outside world (server or a local
  * stand-in for offline play and tests)
  */
@@ -56,6 +65,8 @@ export interface CoopSessionOptions {
     /** Turns which were already played since the snapshot */
     turns: Turn[];
     players?: PlayerInfo[];
+    /** Link other players can join with */
+    inviteLink?: string;
 }
 
 interface UndoStep {
@@ -72,6 +83,7 @@ export class CoopSession {
     readonly transport: CoopTransport;
     readonly world: WorldParams;
     readonly worldName: string;
+    readonly inviteLink: string;
     readonly lockstep: Lockstep;
 
     root: GameRoot = null;
@@ -85,19 +97,23 @@ export class CoopSession {
     /** Entities may only be added / removed by actions and the simulation */
     mutationsAllowed = true;
 
-    private clientSeq = 0;
-
     /** Own actions which were sent but not applied yet */
     readonly pendingActions: Array<Action & { clientSeq: number }> = [];
 
     private undoStack: UndoStep[] = [];
     private recording: UndoStep | null = null;
 
+    /** Called when the player left the game */
+    onLeave: (() => void) | null = null;
+
     /** When set, ticks are only simulated through runTicks (tests) */
     manualTicking = false;
 
     players: PlayerInfo[];
     lastHash: { turn: number; hash: string } | null = null;
+
+    /** Recent state hashes by turn, for tests and debugging */
+    readonly hashHistory = new Map<number, string>();
 
     readonly signals = {
         turnApplied: new Signal<[number]>(),
@@ -107,6 +123,8 @@ export class CoopSession {
         chat: new Signal<[number, string]>(),
         notice: new Signal<[string, string]>(),
         connectionChanged: new Signal<[boolean]>(),
+        /** The connection failed for good (e.g. the server was updated) */
+        fatalError: new Signal<[string]>(),
     };
 
     constructor(options: CoopSessionOptions) {
@@ -114,6 +132,7 @@ export class CoopSession {
         this.transport = options.transport;
         this.world = options.world;
         this.worldName = options.worldName ?? "";
+        this.inviteLink = options.inviteLink ?? "";
         this.pendingSnapshot = options.snapshot;
         this.players = options.players ?? [];
         this.lockstep = new Lockstep(options.startTurn);
@@ -157,6 +176,16 @@ export class CoopSession {
     }
 
     /**
+     * Adds all turns of a range (sparse list, missing turns are empty)
+     */
+    receiveTurnRange(range: { startTurn: number; nextTurn: number; turns: Turn[] }) {
+        const byTurn = new Map(range.turns.map(turn => [turn.n, turn.actions]));
+        for (let n = Math.max(range.startTurn, this.lockstep.latestTurn + 1); n < range.nextTurn; ++n) {
+            this.receiveTurn({ n, actions: byTurn.get(n) ?? [] });
+        }
+    }
+
+    /**
      * Receives a turn from the server
      */
     receiveTurn(turn: Turn) {
@@ -176,9 +205,21 @@ export class CoopSession {
      * included it in a turn.
      */
     dispatch(action: Action) {
-        const message = { ...action, clientSeq: ++this.clientSeq } as Action & { clientSeq: number };
+        const message = { ...action, clientSeq: nextClientSeq() } as Action & { clientSeq: number };
         this.pendingActions.push(message);
         this.transport.sendAction(message);
+    }
+
+    /** Sends the actions again which were not applied yet (after a reconnect) */
+    resendPendingActions() {
+        for (const action of this.pendingActions) {
+            this.transport.sendAction(action);
+        }
+    }
+
+    /** Called by the game state when the game was left */
+    onGameLeft() {
+        this.onLeave?.();
     }
 
     /** Whether the local player already requested to delete this entity */
@@ -372,6 +413,10 @@ export class CoopSession {
         const snapshot = createSnapshot(this.root);
         const hash = computeStateHash(this.root, snapshot);
         this.lastHash = { turn, hash };
+        this.hashHistory.set(turn, hash);
+        if (this.hashHistory.size > 50) {
+            this.hashHistory.delete(this.hashHistory.keys().next().value);
+        }
 
         if (wantsHash) {
             this.transport.sendHash(turn, hash);

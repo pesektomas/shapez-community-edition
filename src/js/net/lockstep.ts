@@ -54,8 +54,8 @@ export class Lockstep {
     }
 
     addTurn(n: number, actions: TurnAction[]) {
-        if (n < this.nextTurn || (n === this.nextTurn && this.tickInTurn > 0)) {
-            // Already simulated (duplicate after a reconnect)
+        if (n <= this.latestTurn) {
+            // Already known (duplicate after a reconnect)
             return;
         }
         if (n !== this.latestTurn + 1) {

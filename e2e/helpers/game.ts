@@ -14,13 +14,9 @@ export async function openGame(page: Page) {
     const errors: string[] = [];
     page.on("pageerror", err => errors.push(err.message));
     await page.goto("/");
-    await page.waitForFunction(
-        () => (window as any).__coop && document.body.id === "state_MainMenuState",
-        null,
-        {
-            timeout: 120_000,
-        }
-    );
+    await page.waitForFunction(() => (window as any).__coop && document.body.id === "state_CoopState", null, {
+        timeout: 120_000,
+    });
     return errors;
 }
 

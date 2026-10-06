@@ -5,7 +5,9 @@
         "module": "nodenext",
         "moduleResolution": "nodenext",
         "allowImportingTsExtensions": true,
-        "strict": false
+        "strict": false,
+        "lib": ["es2023", "dom"],
+        "types": ["node"]
     },
     "include": ["./**/*.ts", "../shared/**/*.ts"]
 }

@@ -86,9 +86,17 @@ export function autoDetectLanguageId() {
  * @param {string} code
  * @param {string | ""} region
  */
+// COOP: Some translation files do not match the language code, loading them
+// failed and the game did not start in e.g. a Czech browser
+const TRANSLATION_FILE_ALIASES = {
+    cs: "cz",
+    ko: "kor",
+};
+
 export async function loadTranslationData(code, region) {
     const locale = code + (region === "" ? "" : `-${region}`);
-    return (await import(`./built-temp/base-${locale}.json`)).default;
+    const file = TRANSLATION_FILE_ALIASES[locale] ?? locale;
+    return (await import(`./built-temp/base-${file}.json`)).default;
 }
 
 export function matchDataRecursive(dest, src, addNewKeys = false) {

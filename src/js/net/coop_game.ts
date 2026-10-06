@@ -1,5 +1,5 @@
 import type { Application } from "../application";
-import { COOP_GAME_MODE_ID } from "../game/modes/coop";
+import { COOP_GAME_MODE_ID } from "./coop_constants";
 import { Savegame } from "../savegame/savegame";
 import type { CoopSession } from "./coop_session";
 

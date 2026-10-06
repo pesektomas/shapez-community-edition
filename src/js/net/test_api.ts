@@ -280,6 +280,28 @@ export class CoopTestApi {
         return actions;
     }
 
+    /** Sends an action like the HUD does (works for networked games) */
+    dispatch(action: Action) {
+        this.session.dispatch(action);
+    }
+
+    /** State hashes computed at the hash interval turns */
+    getHashHistory(): Record<number, string> {
+        return Object.fromEntries(this.session.hashHistory);
+    }
+
+    getNetInfo() {
+        const session = this.session;
+        return {
+            playerId: session.playerId,
+            turn: session.lockstep.nextTurn,
+            latestTurn: session.lockstep.latestTurn,
+            lagMs: session.lockstep.getLagMs(),
+            players: session.players,
+            entities: session.root.entityMgr.entities.size,
+        };
+    }
+
     /** Breaks the local state on purpose (recovery tests) */
     setFakeDesync() {
         const hubGoals = this.session.root.hubGoals;

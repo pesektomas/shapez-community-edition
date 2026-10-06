@@ -187,6 +187,7 @@ export class GameHUD {
             "minerHighlight",
             "shapeTooltip",
             "interactiveTutorial",
+            "coopWorldOverlay", // COOP: other players' cursors and pending actions
         ];
 
         for (let i = 0; i < partsOrder.length; ++i) {

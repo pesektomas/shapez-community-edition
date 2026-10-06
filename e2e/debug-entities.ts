@@ -7,7 +7,7 @@ const scenario = SCENARIOS.find(s => s.name.startsWith(name));
 const browser = await chromium.launch();
 const page = await browser.newPage();
 await page.goto(process.env.E2E_BASE_URL ?? "http://localhost:3010/");
-await page.waitForFunction(() => (window as any).__coop && document.body.id === "state_MainMenuState");
+await page.waitForFunction(() => (window as any).__coop && document.body.id === "state_CoopState");
 await page.evaluate(s => (window as any).__coop.newWorld(s), {
     seed: scenario.seed,
     startLevel: scenario.startLevel,

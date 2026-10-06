@@ -1,0 +1,136 @@
+@use "../mixins" as *;
+@use "../variables" as *;
+
+// COOP: In-game HUD of co-op games
+
+#ingame_HUD_GameMenu.coop .button.save {
+    // Co-op worlds are saved by the server
+    display: none;
+}
+
+#ingame_HUD_CoopPlayers {
+    // Left of the game menu, the waypoint list is below the menu
+    position: absolute;
+    top: 1rem;
+    right: 17rem;
+    min-width: 11rem;
+    max-width: 16rem;
+    padding: 0.6rem 0.8rem;
+    border-radius: $globalBorderRadius;
+    background: rgba(#333438, 0.75);
+    color: #fff;
+    @include SuperSmallText;
+    pointer-events: all;
+
+    .title {
+        text-transform: uppercase;
+        opacity: 0.6;
+        margin-bottom: 0.3rem;
+    }
+
+    .player {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        line-height: 1.6rem;
+
+        &.me .name {
+            font-weight: bold;
+        }
+
+        .dot {
+            width: 0.8rem;
+            height: 0.8rem;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .name {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    }
+
+    .invite {
+        margin-top: 0.5rem;
+        width: calc(100% - 2rem);
+        font-size: 1rem;
+        line-height: 1.3rem;
+    }
+}
+
+#ingame_HUD_CoopBanner {
+    position: absolute;
+    top: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0.5rem 1.2rem;
+    border-radius: $globalBorderRadius;
+    background: rgba(#ef5072, 0.9);
+    color: #fff;
+    @include PlainText;
+    display: none;
+
+    &.visible {
+        display: block;
+    }
+}
+
+#ingame_HUD_CoopChat {
+    position: absolute;
+    left: 1rem;
+    bottom: 13rem;
+    width: 26rem;
+    pointer-events: none;
+
+    .messages {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+    }
+
+    .message {
+        align-self: flex-start;
+        max-width: 100%;
+        padding: 0.3rem 0.6rem;
+        border-radius: $globalBorderRadius;
+        background: rgba(#333438, 0.7);
+        color: #fff;
+        @include SuperSmallText;
+        word-wrap: break-word;
+        transition: opacity 0.5s ease-in-out;
+
+        &.faded {
+            opacity: 0;
+        }
+
+        .name {
+            font-weight: bold;
+        }
+
+        .system {
+            opacity: 0.85;
+            font-style: italic;
+        }
+    }
+
+    .chatInput {
+        display: none;
+        margin-top: 0.4rem;
+        width: 100%;
+        box-sizing: border-box;
+        padding: 0.4rem 0.6rem;
+        border: 0;
+        border-radius: $globalBorderRadius;
+        background: rgba(#fff, 0.95);
+        color: #222;
+        @include SuperSmallText;
+        pointer-events: all;
+        user-select: text;
+    }
+
+    &.open .chatInput {
+        display: block;
+    }
+}

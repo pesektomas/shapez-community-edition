@@ -186,6 +186,7 @@ export type ClientMessage =
           worldId: string;
           inviteKey: string;
           name: string;
+          /** Protocol version and build id, see getClientVersion() */
           clientVersion: string;
           /** Set when reconnecting, the server then only sends missing turns */
           resumeFromTurn?: number;
@@ -199,26 +200,39 @@ export type ClientMessage =
     | { t: "chat"; text: string }
     | { t: "ping"; time: number };
 
+/**
+ * The turns a client has to simulate after loading a snapshot: every turn n
+ * with startTurn <= n < nextTurn. Only turns with actions are listed, all
+ * other turns in the range are empty.
+ */
+export interface TurnRange {
+    startTurn: number;
+    nextTurn: number;
+    turns: Turn[];
+}
+
 export type ServerMessage =
-    | {
+    | ({
           t: "welcome";
           playerId: number;
           playerToken: string;
           color: string;
           world: WorldMeta;
-          /** null for a fresh world, the client then creates it from the world params */
+          /** null for a fresh world (or resumed sessions), the client then creates it from the world params */
           snapshot: SnapshotPayload | null;
-          /** Turns from the snapshot (or from 0) up to now */
-          turnsSince: Turn[];
           players: PlayerInfo[];
+          leaderId: number;
+          /** The leader uploads a snapshot every N turns */
+          snapshotIntervalTurns: number;
+          /** True if the client resumed its session and only gets the missing turns */
           resumed: boolean;
-      }
+      } & TurnRange)
     | ({ t: "turn" } & Turn)
-    | { t: "players"; list: PlayerInfo[] }
+    | { t: "players"; list: PlayerInfo[]; leaderId: number }
     | { t: "cursor"; playerId: number; x: number; y: number; layer: string }
     | { t: "chat"; playerId: number; text: string; time: number }
     | { t: "requestSnapshot"; turn: number }
-    | { t: "resync"; snapshot: SnapshotPayload; turnsSince: Turn[] }
+    | ({ t: "resync"; snapshot: SnapshotPayload } & TurnRange)
     | {
           t: "notice";
           kind: "playerJoined" | "playerLeft" | "desync" | "info";

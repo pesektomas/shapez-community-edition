@@ -1,8 +1,12 @@
 import { TICK_RATE } from "../../../../shared/protocol";
 import type { GameRoot } from "../root";
 import { RegularGameMode } from "./regular";
+import { HUDCoopChat } from "../../net/hud/coop_chat";
+import { HUDCoopNotices } from "../../net/hud/coop_notices";
+import { HUDCoopPlayers } from "../../net/hud/coop_players";
+import { HUDCoopWorldOverlay } from "../../net/hud/coop_world_overlay";
 
-export const COOP_GAME_MODE_ID = "coopMode";
+import { COOP_GAME_MODE_ID } from "../../net/coop_constants";
 
 export interface CoopGameModeParameters {
     seed: number;
@@ -25,8 +29,16 @@ export class CoopGameMode extends RegularGameMode {
         super(root);
         this.parameters = payload ?? { seed: 0, startLevel: 1 };
 
-        // Hints would pause/resume locally and the video offer links to an external page
+        // The video offer links to an external page
         delete this.additionalHudParts.tutorialVideoOffer;
+
+        // Only add the co-op parts when there is a session (not when previewing the mode)
+        if (root.coop) {
+            this.additionalHudParts.coopPlayers = HUDCoopPlayers;
+            this.additionalHudParts.coopChat = HUDCoopChat;
+            this.additionalHudParts.coopNotices = HUDCoopNotices;
+            this.additionalHudParts.coopWorldOverlay = HUDCoopWorldOverlay;
+        }
     }
 
     override getFixedTickrate() {

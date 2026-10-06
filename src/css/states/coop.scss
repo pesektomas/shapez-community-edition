@@ -1,0 +1,287 @@
+@use "../mixins" as *;
+@use "../variables" as *;
+
+// COOP: Landing page of the co-op web build
+#state_CoopState {
+    background: #bbc2cf;
+    overflow-y: auto;
+    display: block !important;
+
+    .coopLanding {
+        max-width: 90rem;
+        margin: 0 auto;
+        padding: 3rem 2rem 4rem;
+        box-sizing: border-box;
+        color: #333438;
+        font-size: $textFontSize;
+        line-height: $textLineHeight;
+        pointer-events: all;
+    }
+
+    header {
+        text-align: center;
+        margin-bottom: 2rem;
+
+        h1 {
+            font-size: 4.5rem;
+            line-height: 5rem;
+            font-weight: 900;
+            letter-spacing: 0.05em;
+            color: #222428;
+        }
+
+        .subtitle {
+            margin-top: 0.4rem;
+            color: #555;
+        }
+    }
+
+    .error {
+        display: none;
+        margin: 0 auto 1.5rem;
+        max-width: 50rem;
+        padding: 1rem 1.4rem;
+        border-radius: $globalBorderRadius;
+        background: #ef5072;
+        color: #fff;
+        text-align: center;
+
+        &.visible {
+            display: block;
+        }
+
+        button {
+            margin-left: 1rem;
+            background: #fff;
+            color: #ef5072;
+        }
+    }
+
+    .columns {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+
+        @include StyleBelowWidth(900px) {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .panel {
+        background: #fff;
+        border-radius: $globalBorderRadius * 1.5;
+        padding: 1.6rem 2rem 2rem;
+        box-shadow: 0 0.3rem 1rem rgba(#000, 0.08);
+
+        h2 {
+            font-size: $headingFontSize;
+            line-height: $headingLineHeight;
+            font-weight: 700;
+            margin: 0.4rem 0 1rem;
+        }
+    }
+
+    .joinPanel {
+        max-width: 50rem;
+        margin: 0 auto 2rem;
+        border: 0.3rem solid #66a6ff;
+
+        .worldName {
+            color: #3e7fd8;
+        }
+
+        .joinButton {
+            margin-top: 1rem;
+            font-size: 2rem;
+            padding: 0.8rem 3rem;
+            background: #66bb6a;
+        }
+    }
+
+    .field {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 1rem;
+
+        span {
+            font-size: $plainTextFontSize;
+            color: #666;
+            margin-bottom: 0.3rem;
+        }
+    }
+
+    input[type="text"],
+    input[type="password"] {
+        font: inherit;
+        padding: 0.6rem 0.8rem;
+        border: 0.15rem solid #d7dbe3;
+        border-radius: $globalBorderRadius;
+        background: #f4f5f8;
+        color: #222;
+        pointer-events: all;
+        user-select: text;
+
+        &:focus {
+            outline: none;
+            border-color: #66a6ff;
+            background: #fff;
+        }
+    }
+
+    .startModes {
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+        margin: 0.5rem 0 1.2rem;
+    }
+
+    .startMode {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        column-gap: 0.8rem;
+        padding: 0.8rem 1rem;
+        border: 0.15rem solid #e3e6ec;
+        border-radius: $globalBorderRadius;
+        cursor: pointer;
+
+        &:has(input:checked) {
+            border-color: #66a6ff;
+            background: #f0f6ff;
+        }
+
+        input {
+            grid-row: span 2;
+            align-self: center;
+            pointer-events: all;
+        }
+
+        .title {
+            font-weight: 700;
+        }
+
+        .desc {
+            font-size: $plainTextFontSize;
+            line-height: $plainTextLineHeight;
+            color: #666;
+        }
+    }
+
+    .createButton {
+        font-size: 1.8rem;
+        padding: 0.6rem 2rem;
+    }
+
+    .worlds {
+        list-style: none;
+        margin: 0 0 1.6rem;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+
+        .empty {
+            color: #777;
+            font-size: $plainTextFontSize;
+        }
+    }
+
+    .worldEntry {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 1rem;
+        padding: 0.8rem 1rem;
+        border: 0;
+        border-radius: $globalBorderRadius;
+        background: #f0f2f6;
+        color: inherit;
+        font: inherit;
+        text-align: left;
+        cursor: pointer;
+        pointer-events: all;
+
+        &:hover {
+            background: #e3ecfb;
+        }
+
+        .name {
+            font-weight: 700;
+        }
+
+        .date {
+            font-size: $plainTextFontSize;
+            color: #777;
+        }
+    }
+
+    .linkRow {
+        display: flex;
+        gap: 0.6rem;
+
+        input {
+            flex: 1;
+            min-width: 0;
+        }
+    }
+
+    footer {
+        margin-top: 2.5rem;
+        text-align: center;
+
+        .credits {
+            margin-top: 1rem;
+            font-size: $plainTextFontSize;
+            color: #555;
+
+            a {
+                color: #3e7fd8;
+                pointer-events: all;
+            }
+        }
+
+        .singleplayerButton {
+            background: #777b85;
+        }
+    }
+
+    .statusOverlay {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: rgba(#bbc2cf, 0.85);
+        z-index: 100;
+
+        &.visible {
+            display: flex;
+        }
+    }
+
+    .statusBox {
+        display: flex;
+        align-items: center;
+        gap: 1.2rem;
+        background: #fff;
+        padding: 1.6rem 2.4rem;
+        border-radius: $globalBorderRadius * 1.5;
+        box-shadow: 0 0.3rem 1rem rgba(#000, 0.1);
+        font-size: $headingFontSize;
+    }
+
+    .spinner {
+        width: 2.4rem;
+        height: 2.4rem;
+        border-radius: 50%;
+        border: 0.35rem solid #d7dbe3;
+        border-top-color: #66a6ff;
+        animation: coopSpin 0.8s linear infinite;
+    }
+}
+
+@keyframes coopSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}

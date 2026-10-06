@@ -1,0 +1,28 @@
+{
+    "name": "tvarovna-server",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "license": "GPL-3.0-or-later",
+    "engines": {
+        "node": ">=22.18"
+    },
+    "scripts": {
+        "start": "node --disable-warning=ExperimentalWarning src/index.ts",
+        "dev": "node --disable-warning=ExperimentalWarning --watch src/index.ts",
+        "test": "node --disable-warning=ExperimentalWarning --test --test-timeout=30000 --test-reporter=spec 'test/**/*.test.ts'",
+        "typecheck": "tsc -p tsconfig.json",
+        "bots": "node --disable-warning=ExperimentalWarning scripts/load_test.ts"
+    },
+    "dependencies": {
+        "@fastify/static": "^8.3.0",
+        "@msgpack/msgpack": "^3.1.3",
+        "fastify": "^5.12.5",
+        "ws": "^8.22.0"
+    },
+    "devDependencies": {
+        "@types/node": "^22.20.5",
+        "@types/ws": "^8.18.2",
+        "typescript": "^5.9.3"
+    }
+}

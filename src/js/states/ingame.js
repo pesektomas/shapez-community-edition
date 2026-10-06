@@ -155,6 +155,11 @@ export class InGameState extends GameState {
      * Goes back to the menu state
      */
     goBackToMenu() {
+        // COOP: Co-op games return to the co-op menu
+        if (this.creationPayload && this.creationPayload.coopSession) {
+            this.saveThenGoToState("CoopState");
+            return;
+        }
         if ([enumGameModeIds.puzzleEdit, enumGameModeIds.puzzlePlay].includes(this.gameModeId)) {
             this.saveThenGoToState("PuzzleMenuState");
         } else {
@@ -373,6 +378,11 @@ export class InGameState extends GameState {
      */
     stageDestroyed() {
         if (this.switchStage(GAME_LOADING_STATES.destroyed)) {
+            // COOP: Leaving a co-op game disconnects (unless the game is restarted)
+            if (this.creationPayload && this.creationPayload.coopSession) {
+                this.creationPayload.coopSession.onGameLeft();
+            }
+
             // Cleanup all api calls
             this.cancelAllAsyncOperations();
 

@@ -13,6 +13,8 @@
         "build:web": "gulp --cwd gulp package.web.static",
         "serve:web": "gulp --cwd gulp serve.web",
         "build:web-dev": "gulp --cwd gulp package.web.dev",
+        "test:e2e": "playwright test -c e2e/playwright.config.ts --project=chromium",
+        "desync:diff": "node --disable-warning=ExperimentalWarning e2e/scripts/desync_diff.ts",
         "lint": "eslint .",
         "prettier-all": "prettier --write .",
         "package-win32-x64": "gulp --cwd gulp package.standalone.win32-x64",
