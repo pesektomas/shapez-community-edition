@@ -11,7 +11,7 @@ Na sestavení hry je potřeba Java a ffmpeg.
 ```sh
 # Docker (hra + server v jednom kontejneru)
 docker compose up -d --build
-# → http://localhost:8080
+# → http://localhost:3100 (jen localhost, na VPS před to patří nginx)
 
 # Bez Dockeru (vývoj)
 npm ci && npm run build:web          # nebo build:web-dev s testovacími háčky
@@ -142,6 +142,24 @@ ssh user@vps 'pm2 startup'               # vypíše příkaz se sudo, ten spusti
 paměti a v jednom SQLite souboru) na `127.0.0.1:3100`. Port se mění v ecosystem
 souboru a v nginx konfiguraci. Data jsou v `/opt/tvarovna/data`, zálohy v `data/backups`.
 Po nasazení nové verze dostanou připojení hráči hlášku „obnov stránku“.
+
+### VPS s Dockerem vedle stávajících webů
+
+Kontejner poslouchá jen na `127.0.0.1:3100`. Porty 80/443 dál obsluhuje stávající
+nginx a hra dostane vlastní (sub)doménu:
+
+```sh
+git clone https://github.com/pesektomas/shapez-community-edition /opt/tvarovna && cd /opt/tvarovna
+echo "SERVER_PASSWORD=..." > .env          # volitelné, compose si .env načte sám
+docker compose up -d --build               # první build trvá několik minut, chce ~2 GB RAM
+curl http://127.0.0.1:3100/healthz
+
+# nginx: deploy/nginx/tvarovna.conf (upravit doménu), pak certbot --nginx -d hra.domena.cz
+# aktualizace: git pull && docker compose up -d --build
+```
+
+V DNS stačí A záznam subdomény na IP VPS. Stávající domény a jejich nginx bloky se
+nemění.
 
 ### Docker
 

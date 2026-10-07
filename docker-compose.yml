@@ -1,11 +1,15 @@
 # Local run or a single VPS:  docker compose up -d --build
-# Then open http://localhost:8080 (put a TLS proxy like Caddy or Traefik in front for the internet)
+# The game listens on 127.0.0.1:3100 only. On a VPS the existing reverse proxy
+# (nginx, see deploy/nginx/tvarovna.conf) serves the domain with HTTPS and
+# forwards to it, so ports 80/443 and the other sites stay untouched.
+# Locally open http://localhost:3100
 services:
     tvarovna:
         build: .
         image: tvarovna:latest
         ports:
-            - "${PORT:-8080}:8080"
+            # Docker bypasses ufw, never publish on all interfaces
+            - "${BIND:-127.0.0.1}:${PORT:-3100}:8080"
         environment:
             # Optional global password for creating and joining worlds
             SERVER_PASSWORD: ${SERVER_PASSWORD:-}
