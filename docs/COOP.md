@@ -121,6 +121,30 @@ když scénář nedělá, co má.
 
 ## Nasazení
 
+### VPS bez Dockeru (PM2 + nginx)
+
+Hra se sestaví na vývojářském stroji (Java a ffmpeg na VPS nejsou potřeba) a na
+VPS se nahraje hotová. Na VPS stačí Node 22.13+, PM2 a rsync.
+
+```sh
+# jednou na VPS: heslo serveru (volitelné) a nginx s HTTPS
+ssh user@vps 'mkdir -p /opt/tvarovna && echo "SERVER_PASSWORD=..." > /opt/tvarovna/tvarovna.env'
+# deploy/nginx/tvarovna.conf → /etc/nginx/sites-available/, upravit doménu, certbot --nginx
+
+# při každém nasazení, z kořene repa na vývojářském stroji
+deploy/deploy-vps.sh user@vps            # výchozí adresář /opt/tvarovna, port 3100
+
+# aby PM2 naběhl po restartu VPS (jednou)
+ssh user@vps 'pm2 startup'               # vypíše příkaz se sudo, ten spustit
+```
+
+`deploy/pm2/ecosystem.config.cjs` spouští jeden proces (`instances: 1`, světy jsou v
+paměti a v jednom SQLite souboru) na `127.0.0.1:3100`. Port se mění v ecosystem
+souboru a v nginx konfiguraci. Data jsou v `/opt/tvarovna/data`, zálohy v `data/backups`.
+Po nasazení nové verze dostanou připojení hráči hlášku „obnov stránku“.
+
+### Docker
+
 -   `Dockerfile`: multi-stage build (hra s ffmpeg a Javou → serverové závislosti →
     `node:22-slim`). Builder pro Electron je v `Dockerfile.builder`.
 -   `docker-compose.yml`: lokálně nebo na VPS, volume `tvarovna-data`. Před server
