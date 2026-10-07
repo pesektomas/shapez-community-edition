@@ -5,6 +5,9 @@ akce do tahů (deterministický lockstep) a hru nesimuluje.
 
 ## Rychlý start
 
+Potřeba je Node 22.13 nebo novější. Server běží jako TypeScript přes `--experimental-strip-types`, bez buildu.
+Na sestavení hry je potřeba Java a ffmpeg.
+
 ```sh
 # Docker (hra + server v jednom kontejneru)
 docker compose up -d --build
@@ -14,6 +17,10 @@ docker compose up -d --build
 npm ci && npm run build:web          # nebo build:web-dev s testovacími háčky
 cd server && npm ci
 STATIC_DIR=../build_output/web npm start
+
+# Vývoj: terminál 1 průběžně sestavuje hru do build/, terminál 2 pouští server
+npm run serve:web
+cd server && STATIC_DIR=../build npm run dev   # → http://localhost:8080 (port 3005 je jen statika bez serveru)
 ```
 
 Organizátor otevře `/`, zadá přezdívku, zvolí start (level 1, 7 nebo 27) a klikne na

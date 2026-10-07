@@ -48,7 +48,7 @@ export async function startCoopServer(env: Record<string, string> = {}): Promise
         dataDir,
         logs,
         async start() {
-            child = spawn(process.execPath, ["--disable-warning=ExperimentalWarning", "src/index.ts"], {
+            child = spawn(process.execPath, ["--experimental-strip-types", "--disable-warning=ExperimentalWarning", "src/index.ts"], {
                 cwd: join(repoRoot, "server"),
                 env: {
                     ...process.env,
